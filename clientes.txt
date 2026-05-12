@@ -1,0 +1,4 @@
+1;Nathalia;nsss@cesar.school;(81) 99209-8068;Pessoa Física;11049519400;Inativo;06/04/2026
+2;Ariely;adt@cesar.school;(81) 98475-7415;Pessoa Física;145326489;Inativo;06/04/2026
+3;Isly;ilptb@cesar.school;(81) 98456-6874;Pessoa Física;105.485.369-91;Ativo;06/04/2026
+4;Fabio;fms@cesar.school;(81) 99160-2587;Pessoa Física;616.004.864-91;Ativo;06/04/2026
