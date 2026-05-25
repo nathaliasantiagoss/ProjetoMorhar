@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${chamado.clienteNome} + ' – Morhar'">Detalhe</title>
+    <link rel="stylesheet" href="/css/morhar.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.min.css">
+    <style>
+        .detail-topbar {
+            background: var(--app-dark); color: white; padding: 0 18px;
+            height: var(--header-h); display: flex; align-items: center;
+            justify-content: space-between; position: sticky; top: 0; z-index: 100;
+        }
+        .detail-hero {
+            background: var(--app-dark); color: white; padding: 6px 20px 24px;
+        }
+        .detail-numero { font-size: 12px; color: #f59e0b; font-weight: 700; margin-bottom: 5px; }
+        .detail-title  { font-size: 21px; font-weight: 800; line-height: 1.2; }
+        .detail-sub    { font-size: 12px; opacity: .7; margin: 4px 0 14px; }
+        .pill-row      { display: flex; gap: 8px; flex-wrap: wrap; }
+        .pill {
+            padding: 5px 12px; border-radius: 20px;
+            font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 5px;
+        }
+        .pill-andamento  { background: rgba(251,191,36,.18); color: #fbbf24; border: 1.5px solid #fbbf24; }
+        .pill-finalizado { background: rgba(34,197,94,.15);  color: #22c55e; border: 1.5px solid #22c55e; }
+        .pill-aberto     { background: rgba(239,68,68,.15);  color: #ef4444; border: 1.5px solid #ef4444; }
+        .pill-alta       { background: rgba(239,68,68,.15);  color: #ef4444; border: 1.5px solid #ef4444; }
+        .pill-media      { background: rgba(245,158,11,.18); color: #f59e0b; border: 1.5px solid #f59e0b; }
+        .pill-baixa      { background: rgba(34,197,94,.15);  color: #22c55e; border: 1.5px solid #22c55e; }
+
+        .attach-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+        .attach-thumb { aspect-ratio:1; border-radius: 10px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--text-muted); }
+        .attach-add   { aspect-ratio:1; border-radius: 10px; border: 2px dashed #cbd5e1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--app-accent); font-size: 11px; font-weight: 600; cursor: pointer; }
+
+        .action-bar { display: flex; gap: 10px; padding: 12px 16px 16px; background: white; border-top: 1px solid #f1f5f9; }
+        .btn-obs { flex: 1; background: white; color: var(--text-secondary); border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 13px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .btn-finalizar { flex: 1.5; background: var(--app-accent); color: white; border: none; border-radius: 14px; padding: 13px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .btn-finalizar:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+        @media (min-width: 768px) {
+            .detail-topbar { display: none; }
+            .detail-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+            .detail-col  { min-width: 0; }
+            .card-section { margin: 12px 14px !important; }
+            .detail-hero-desktop { background: white; padding: 24px 28px 20px; border-bottom: 1px solid #e2e8f0; }
+            .detail-hero-desktop .detail-numero { color: var(--app-accent); }
+            .detail-hero-desktop .detail-title  { color: var(--text-primary); }
+            .detail-hero-desktop .detail-sub    { color: var(--text-secondary); opacity: 1; }
+            .action-bar { padding: 14px 28px 20px !important; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-wrapper">
+
+    <!-- Mobile-only detail top bar (replaces main header on mobile) -->
+    <div class="detail-topbar mobile-only">
+        <a href="/chamados" style="color:white;text-decoration:none"><i class="bi bi-arrow-left" style="font-size:22px"></i></a>
+        <span style="font-size:16px;font-weight:700">Detalhes do Chamado</span>
+        <i class="bi bi-three-dots-vertical" style="font-size:20px;cursor:pointer"></i>
+    </div>
+
+    <!-- Desktop header -->
+    <header class="app-header desktop-only">
+        <div style="display:flex;align-items:center;gap:12px">
+            <a href="/chamados" style="color:white;text-decoration:none;display:flex;align-items:center;gap:8px">
+                <i class="bi bi-arrow-left" style="font-size:20px"></i>
+                <span style="font-size:13px;opacity:.75">Chamados</span>
+            </a>
+        </div>
+        <div class="header-logo">
+            <svg width="26" height="26" viewBox="0 0 50 50" fill="none">
+                <polygon points="25,5 45,18 45,40 25,48 5,40 5,18" fill="#0d9e9e" opacity=".9"/>
+                <polygon points="32,30 45,22 45,40 32,40" fill="#f59e0b"/>
+            </svg>
+            <div>
+                <div class="header-logo-text">MORHAR</div>
+                <span class="header-logo-sub">AUTOMAÇÃO</span>
+            </div>
+        </div>
+        <div class="header-right-group">
+            <div class="header-user">
+                <span class="header-username">João Silva</span>
+                <div class="header-avatar">JS</div>
+            </div>
+            <div style="position:relative"><i class="bi bi-bell header-icon"></i><span class="notif-badge">3</span></div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-group-label">MENU PRINCIPAL</div>
+        <a href="/dashboard" class="sidebar-item"><i class="bi bi-house-fill"></i> Dashboard</a>
+        <a href="/chamados"  class="sidebar-item active"><i class="bi bi-file-text"></i> Chamados</a>
+        <a href="/clientes"  class="sidebar-item"><i class="bi bi-people"></i> Clientes</a>
+        <a href="/agenda"    class="sidebar-item"><i class="bi bi-calendar3"></i> Agenda</a>
+        <div class="sidebar-group-label">SISTEMA</div>
+        <a href="#"          class="sidebar-item"><i class="bi bi-person"></i> Perfil</a>
+        <a href="#"          class="sidebar-item"><i class="bi bi-gear"></i> Configurações</a>
+        <div class="sidebar-footer">
+            <a href="/login" class="sidebar-item"><i class="bi bi-box-arrow-left"></i> Sair</a>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="app-content">
+
+        <!-- Mobile hero -->
+        <div class="detail-hero mobile-only">
+            <div class="detail-numero" th:text="'#' + ${chamado.numero}">#CH-2024-0000</div>
+            <div class="detail-title"  th:text="${chamado.clienteNome}">Cliente</div>
+            <div class="detail-sub"    th:text="${chamado.descricao}">Descrição</div>
+            <div class="pill-row">
+                <span class="pill" th:text="${chamado.status}"
+                      th:classappend="${chamado.status=='Finalizado'}?' pill-finalizado':(${chamado.status=='Em andamento'}?' pill-andamento':' pill-aberto')"></span>
+                <span class="pill" th:text="${chamado.prioridade} + ' PRIORIDADE'"
+                      th:classappend="${chamado.prioridade=='Alta'}?' pill-alta':(${chamado.prioridade=='Média'}?' pill-media':' pill-baixa')"></span>
+            </div>
+        </div>
+
+        <!-- Desktop hero (inside white area) -->
+        <div class="detail-hero-desktop desktop-only">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                <div>
+                    <div class="detail-numero" th:text="'#' + ${chamado.numero}">#CH-2024-0000</div>
+                    <div class="detail-title"  th:text="${chamado.clienteNome}">Cliente</div>
+                    <div class="detail-sub"    th:text="${chamado.descricao}">Descrição</div>
+                    <div class="pill-row" style="margin-top:10px">
+                        <span class="pill" th:text="${chamado.status}"
+                              th:classappend="${chamado.status=='Finalizado'}?' pill-finalizado':(${chamado.status=='Em andamento'}?' pill-andamento':' pill-aberto')"></span>
+                        <span class="pill" th:text="${chamado.prioridade} + ' PRIORIDADE'"
+                              th:classappend="${chamado.prioridade=='Alta'}?' pill-alta':(${chamado.prioridade=='Média'}?' pill-media':' pill-baixa')"></span>
+                    </div>
+                </div>
+                <div style="display:flex;gap:10px">
+                    <a th:href="@{/chamados/editar/{id}(id=${chamado.id})}" class="btn-sm btn-sm-outline" style="border:1.5px solid #e2e8f0">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Two column body on desktop -->
+        <div class="detail-body">
+            <!-- Left column -->
+            <div class="detail-col">
+                <!-- Informações gerais -->
+                <div class="card-section">
+                    <div class="card-section-title"><i class="bi bi-info-circle-fill"></i> Informações gerais</div>
+                    <div class="info-row">
+                        <span class="info-label">Cliente</span>
+                        <span class="info-value" th:text="${chamado.clienteNome}">–</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Endereço</span>
+                        <span class="info-value"><span th:text="${chamado.endereco}">–</span> <i class="bi bi-geo-alt" style="color:var(--app-accent)"></i></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Data de abertura</span>
+                        <span class="info-value" th:text="${chamado.dataAbertura} + ' às ' + ${chamado.horaAbertura}">–</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Última atualização</span>
+                        <span class="info-value" th:text="${chamado.ultimaAtualizacao}">–</span>
+                    </div>
+                </div>
+
+                <!-- Descrição -->
+                <div class="card-section">
+                    <div class="card-section-title"><i class="bi bi-chat-left-text-fill"></i> Descrição do problema</div>
+                    <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin:0" th:text="${chamado.descricao}">–</p>
+                </div>
+
+                <!-- Atribuição -->
+                <div class="card-section">
+                    <div class="card-section-title"><i class="bi bi-person-badge-fill"></i> Atribuição</div>
+                    <div class="info-row">
+                        <span class="info-label">Técnico responsável</span>
+                        <span class="info-value" style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+                            <i class="bi bi-person-circle" style="color:var(--app-accent)"></i>
+                            <span th:text="${chamado.tecnico}">–</span>
+                            <a th:href="@{/chamados/editar/{id}(id=${chamado.id})}" style="color:var(--app-accent)"><i class="bi bi-pencil"></i></a>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Equipe</span>
+                        <span class="info-value" style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+                            <span th:text="${chamado.equipe}">–</span>
+                            <a th:href="@{/chamados/editar/{id}(id=${chamado.id})}" style="color:var(--app-accent)"><i class="bi bi-pencil"></i></a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right column -->
+            <div class="detail-col">
+                <!-- Andamento do chamado -->
+                <div class="card-section">
+                    <div class="card-section-title"><i class="bi bi-clock-history"></i> Andamento do chamado</div>
+                    <div>
+                        <div class="tl-step">
+                            <div class="tl-side">
+                                <div class="tl-dot done"><i class="bi bi-check"></i></div>
+                                <div class="tl-line done"></div>
+                            </div>
+                            <div class="tl-body">
+                                <div class="tl-label">Chamado criado</div>
+                                <div class="tl-date" th:text="${chamado.dataAbertura} + ' às ' + ${chamado.horaAbertura}">–</div>
+                            </div>
+                            <div class="tl-tech" th:text="${chamado.tecnico}">–</div>
+                        </div>
+                        <div class="tl-step">
+                            <div class="tl-side">
+                                <div class="tl-dot"
+                                     th:classappend="${chamado.status=='Em andamento' or chamado.status=='Finalizado'}?'done':'current'">
+                                    <i class="bi bi-check" th:if="${chamado.status=='Em andamento' or chamado.status=='Finalizado'}"></i>
+                                </div>
+                                <div class="tl-line" th:classappend="${chamado.status=='Finalizado'}?'done':''"></div>
+                            </div>
+                            <div class="tl-body">
+                                <div class="tl-label">Em andamento</div>
+                                <div class="tl-date" th:if="${chamado.status!='Aberto'}" th:text="${chamado.dataAbertura}">–</div>
+                            </div>
+                            <div class="tl-tech" th:if="${chamado.status!='Aberto'}" th:text="${chamado.tecnico}">–</div>
+                        </div>
+                        <div class="tl-step">
+                            <div class="tl-side">
+                                <div class="tl-dot pending"></div>
+                                <div class="tl-line"></div>
+                            </div>
+                            <div class="tl-body"><div class="tl-label" style="color:var(--text-muted)">Aguardando peças</div></div>
+                            <div class="tl-tech" style="color:var(--text-muted)">–</div>
+                        </div>
+                        <div class="tl-step">
+                            <div class="tl-side">
+                                <div class="tl-dot" th:classappend="${chamado.status=='Finalizado'}?'done':'pending'">
+                                    <i class="bi bi-check" th:if="${chamado.status=='Finalizado'}"></i>
+                                </div>
+                            </div>
+                            <div class="tl-body">
+                                <div class="tl-label" th:style="${chamado.status!='Finalizado'}?'color:var(--text-muted)'">Finalizado</div>
+                                <div class="tl-date" th:if="${chamado.status=='Finalizado'}" th:text="${chamado.ultimaAtualizacao}">–</div>
+                            </div>
+                            <div class="tl-tech" th:text="${chamado.status=='Finalizado'}?${chamado.tecnico}:'–'"
+                                 th:style="${chamado.status!='Finalizado'}?'color:var(--text-muted)'">–</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Anexos -->
+                <div class="card-section">
+                    <div class="card-section-title"><i class="bi bi-paperclip"></i> Anexos e fotos</div>
+                    <div class="attach-grid">
+                        <div class="attach-thumb"><i class="bi bi-image"></i></div>
+                        <div class="attach-thumb"><i class="bi bi-image"></i></div>
+                        <div class="attach-thumb"><i class="bi bi-image"></i></div>
+                        <div class="attach-add"><i class="bi bi-plus" style="font-size:22px"></i><span>Adicionar</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action bar -->
+        <div class="action-bar">
+            <button class="btn-obs"><i class="bi bi-chat-left-text"></i> Adicionar observação</button>
+            <form th:action="@{/chamados/finalizar/{id}(id=${chamado.id})}" method="post" style="flex:1.5">
+                <button type="submit" class="btn-finalizar" style="width:100%"
+                        th:disabled="${chamado.status=='Finalizado'}">
+                    <i class="bi bi-check-circle"></i>
+                    <span th:text="${chamado.status=='Finalizado'}?'Finalizado':'Marcar como finalizado'">Finalizar</span>
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+        <a href="/dashboard" class="nav-item"><i class="bi bi-house-fill"></i><span>Dashboard</span></a>
+        <a href="/chamados"  class="nav-item active"><i class="bi bi-file-text"></i><span>Chamados</span></a>
+        <a href="/clientes"  class="nav-item"><i class="bi bi-people"></i><span>Clientes</span></a>
+        <a href="/agenda"    class="nav-item"><i class="bi bi-calendar3"></i><span>Agenda</span></a>
+        <a href="#"          class="nav-item"><i class="bi bi-three-dots"></i><span>Mais</span></a>
+    </nav>
+</div>
+</body>
+</html>
