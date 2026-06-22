@@ -1,5 +1,7 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -21,7 +23,6 @@
         .summary-label { font-size: 15px; font-weight: 700; color: var(--text-primary); }
         .date-chip { font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 5px; background: #f8fafc; padding: 5px 10px; border-radius: 10px; }
 
-        /* Stats grid: 2×2 on mobile, 4×1 on desktop */
         .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         @media (min-width: 768px) { .stat-grid { grid-template-columns: repeat(4,1fr); gap: 16px; } }
 
@@ -31,7 +32,6 @@
         .stat-value { font-size: 28px; font-weight: 800; line-height: 1; }
         .stat-sub   { font-size: 10px; color: var(--text-muted); }
 
-        /* Agenda card */
         .agenda-card { background: white; border-radius: 16px; padding: 14px 16px; margin: 0 16px 10px; display: flex; align-items: center; gap: 14px; box-shadow: 0 1px 8px rgba(0,0,0,.05); text-decoration: none; color: inherit; transition: box-shadow .15s; }
         .agenda-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.1); }
         .agenda-time { font-size: 20px; font-weight: 800; color: var(--app-accent); min-width: 52px; }
@@ -40,7 +40,6 @@
         .agenda-info .agenda-desc { font-size: 12px; color: var(--text-secondary); }
         .agenda-info .agenda-loc  { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
 
-        /* Desktop two-column layout for dashboard body */
         @media (min-width: 768px) {
             .dashboard-body { display: grid; grid-template-columns: 2fr 1fr; gap: 0; padding: 0 28px 24px; }
             .dashboard-col  { min-width: 0; }
@@ -60,10 +59,7 @@
         <div style="display:flex;align-items:center;gap:12px">
             <i class="bi bi-list header-icon" style="font-size:24px"></i>
             <div class="header-logo">
-                <svg width="26" height="26" viewBox="0 0 50 50" fill="none">
-                    <polygon points="25,5 45,18 45,40 25,48 5,40 5,18" fill="#0d9e9e" opacity=".9"/>
-                    <polygon points="32,30 45,22 45,40 32,40" fill="#f59e0b"/>
-                </svg>
+                <img src="/images/logo-morhar.png" width="32" height="32" alt="Morhar" style="object-fit:contain">
                 <div>
                     <div class="header-logo-text">MORHAR</div>
                     <span class="header-logo-sub">AUTOMAÇÃO</span>
@@ -76,8 +72,8 @@
         </div>
         <div class="header-right-group">
             <div class="header-user">
-                <span class="header-username">João Silva</span>
-                <div class="header-avatar">JS</div>
+                <span class="header-username" th:text="${#authentication.name}">Usuário</span>
+                <div class="header-avatar" th:text="${#strings.toUpperCase(#authentication.name.substring(0,1))}">U</div>
             </div>
             <div style="position:relative">
                 <i class="bi bi-bell header-icon"></i>
@@ -91,13 +87,18 @@
         <div class="sidebar-group-label">MENU PRINCIPAL</div>
         <a href="/dashboard" class="sidebar-item active"><i class="bi bi-house-fill"></i> Dashboard</a>
         <a href="/chamados"  class="sidebar-item"><i class="bi bi-file-text"></i> Chamados</a>
-        <a href="/clientes"  class="sidebar-item"><i class="bi bi-people"></i> Clientes</a>
+        <a href="/clientes"  class="sidebar-item" sec:authorize="hasRole('ADMIN')"><i class="bi bi-people"></i> Clientes</a>
+        <a href="/tecnicos"  class="sidebar-item" sec:authorize="hasRole('ADMIN')"><i class="bi bi-person-gear"></i> Técnicos</a>
         <a href="/agenda"    class="sidebar-item"><i class="bi bi-calendar3"></i> Agenda</a>
         <div class="sidebar-group-label">SISTEMA</div>
-        <a href="#"          class="sidebar-item"><i class="bi bi-person"></i> Perfil</a>
-        <a href="#"          class="sidebar-item"><i class="bi bi-gear"></i> Configurações</a>
+        <a href="/perfil"    class="sidebar-item"><i class="bi bi-person"></i> Perfil</a>
+        
         <div class="sidebar-footer">
-            <a href="/login" class="sidebar-item"><i class="bi bi-box-arrow-left"></i> Sair</a>
+            <form th:action="@{/logout}" method="post" style="margin:0">
+                <button type="submit" class="sidebar-item" style="background:none;border:none;cursor:pointer;font:inherit;width:100%">
+                    <i class="bi bi-box-arrow-left"></i> Sair
+                </button>
+            </form>
         </div>
     </nav>
 
@@ -107,17 +108,17 @@
         <!-- MOBILE: hero + overlapping summary card -->
         <div class="mobile-only">
             <div class="hero-section">
-                <div class="hero-greeting">Olá, João! 👋</div>
+                <div class="hero-greeting">Olá, <span th:text="${#authentication.name}">Usuário</span>! 👋</div>
                 <div class="hero-sub">Bem-vindo ao sistema de atendimentos técnicos</div>
             </div>
             <div class="summary-card">
                 <div class="summary-top">
                     <span class="summary-label">Resumo geral</span>
-                    <span class="date-chip"><i class="bi bi-calendar3"></i> 20 de maio de 2024 <i class="bi bi-chevron-down" style="font-size:10px"></i></span>
+                    <span class="date-chip"><i class="bi bi-calendar3"></i> <span th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy')}">hoje</span></span>
                 </div>
                 <div class="stat-grid">
                     <div class="stat-item">
-                        <div class="stat-icon-wrap" style="background:#dbeafe;color:#2563eb"><i class="bi bi-clipboard-list-fill"></i></div>
+                        <div class="stat-icon-wrap" style="background:#dbeafe;color:#2563eb"><i class="bi bi-inbox-fill"></i></div>
                         <div class="stat-label">Abertos</div>
                         <div class="stat-value" style="color:#2563eb" th:text="${totalAbertos}">0</div>
                         <div class="stat-sub">chamados</div>
@@ -142,7 +143,7 @@
                     </div>
                 </div>
             </div>
-            <div style="padding:20px 16px 0">
+            <div style="padding:20px 16px 0" sec:authorize="hasRole('ADMIN')">
                 <a href="/chamados/novo" class="btn-app-primary" style="width:100%;border-radius:16px;padding:16px">
                     <i class="bi bi-plus-circle" style="font-size:18px"></i> Novo Chamado
                 </a>
@@ -154,14 +155,14 @@
             <div class="page-title-bar">
                 <div>
                     <h1>Dashboard</h1>
-                    <p>Bem-vindo ao sistema de atendimentos técnicos – <span th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy')}">20/05/2024</span></p>
+                    <p>Bem-vindo ao sistema de atendimentos técnicos – <span th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy')}">hoje</span></p>
                 </div>
-                <a href="/chamados/novo" class="btn-app-primary"><i class="bi bi-plus-circle"></i> Novo Chamado</a>
+                <a href="/chamados/novo" class="btn-app-primary" sec:authorize="hasRole('ADMIN')"><i class="bi bi-plus-circle"></i> Novo Chamado</a>
             </div>
             <div class="stat-grid-wrap" style="padding:24px 28px 0">
                 <div class="stat-grid">
                     <div class="stat-item">
-                        <div class="stat-icon-wrap" style="background:#dbeafe;color:#2563eb"><i class="bi bi-clipboard-list-fill"></i></div>
+                        <div class="stat-icon-wrap" style="background:#dbeafe;color:#2563eb"><i class="bi bi-inbox-fill"></i></div>
                         <div class="stat-label">Abertos</div>
                         <div class="stat-value" style="color:#2563eb" th:text="${totalAbertos}">0</div>
                         <div class="stat-sub">chamados</div>
@@ -190,7 +191,6 @@
 
         <!-- Body (shared): últimos chamados + agenda -->
         <div class="dashboard-body" style="margin-top:8px">
-            <!-- Últimos chamados -->
             <div class="dashboard-col">
                 <div class="section-header">
                     <span class="section-title">Últimos chamados</span>
@@ -221,7 +221,6 @@
                 </div>
             </div>
 
-            <!-- Agenda de hoje -->
             <div class="dashboard-col">
                 <div class="section-header">
                     <span class="section-title">Agenda de hoje</span>
@@ -261,9 +260,9 @@
     <nav class="bottom-nav">
         <a href="/dashboard" class="nav-item active"><i class="bi bi-house-fill"></i><span>Dashboard</span></a>
         <a href="/chamados"  class="nav-item"><i class="bi bi-file-text"></i><span>Chamados</span></a>
-        <a href="/clientes"  class="nav-item"><i class="bi bi-people"></i><span>Clientes</span></a>
-        <a href="/agenda"    class="nav-item"><i class="bi bi-calendar3"></i><span>Agenda</span></a>
-        <a href="#"          class="nav-item"><i class="bi bi-three-dots"></i><span>Mais</span></a>
+        <a href="/clientes"  class="nav-item" sec:authorize="hasRole('ADMIN')"><i class="bi bi-people"></i><span>Clientes</span></a>
+        <a href="/tecnicos"  class="nav-item" sec:authorize="hasRole('ADMIN')"><i class="bi bi-person-gear"></i><span>Técnicos</span></a>
+        <a href="/agenda"    class="nav-item" sec:authorize="hasRole('TECNICO')"><i class="bi bi-calendar3"></i><span>Agenda</span></a>
     </nav>
 </div>
 </body>

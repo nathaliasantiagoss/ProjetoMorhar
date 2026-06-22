@@ -1,0 +1,272 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${ag.titulo} + ' – Morhar'">Agendamento</title>
+    <link rel="stylesheet" href="/css/morhar.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.min.css">
+    <style>
+        .detail-topbar {
+            background: var(--app-dark); color: white; padding: 0 18px;
+            height: var(--header-h); display: flex; align-items: center;
+            justify-content: space-between; position: sticky; top: 0; z-index: 100;
+        }
+        .hero-band {
+            background: var(--app-dark); color: white; padding: 8px 20px 24px;
+        }
+        .hero-band .hero-date {
+            font-size: 12px; color: #f59e0b; font-weight: 700; margin-bottom: 4px;
+        }
+        .hero-band .hero-title { font-size: 20px; font-weight: 800; line-height: 1.2; }
+        .hero-band .hero-client { font-size: 12px; opacity: .7; margin-top: 4px; }
+
+        .badge-agendado   { background: #dbeafe; color: #2563eb; }
+        .badge-confirmado { background: #ccfbf1; color: #0d9488; }
+        .badge-realizado  { background: #dcfce7; color: #16a34a; }
+        .badge-cancelado  { background: #f1f5f9; color: #64748b; }
+
+        .action-bar { display: flex; gap: 10px; padding: 12px 16px 16px; background: white; border-top: 1px solid #f1f5f9; }
+        .btn-realizar {
+            flex: 1; background: var(--app-accent); color: white; border: none;
+            border-radius: 14px; padding: 13px; font-size: 13px; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%;
+        }
+        .btn-realizar:disabled { background: #cbd5e1; cursor: not-allowed; }
+        .btn-cancelar {
+            background: #fee2e2; color: #dc2626; border: none; border-radius: 14px;
+            padding: 13px 18px; font-size: 13px; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+
+        .alert-flash {
+            margin: 10px 16px; padding: 11px 14px; border-radius: 12px; font-size: 13px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .alert-flash.erro    { background: #fef2f2; color: #dc2626; border: 1.5px solid #fca5a5; }
+        .alert-flash.sucesso { background: #f0fdf4; color: #16a34a; border: 1.5px solid #86efac; }
+
+        @media (min-width: 768px) {
+            .detail-topbar { display: none; }
+            .hero-band { display: none; }
+            .hero-band-desktop { display: block !important; }
+            .action-bar { padding: 14px 28px 20px !important; }
+        }
+        .hero-band-desktop { display: none; }
+    </style>
+</head>
+<body>
+<div class="app-wrapper">
+
+    <!-- Mobile top bar -->
+    <div class="detail-topbar mobile-only">
+        <a href="/agenda" style="color:white;text-decoration:none">
+            <i class="bi bi-arrow-left" style="font-size:22px"></i>
+        </a>
+        <span style="font-size:16px;font-weight:700">Detalhe do Agendamento</span>
+        <div style="width:24px"></div>
+    </div>
+
+    <!-- Desktop header -->
+    <header class="app-header desktop-only">
+        <div style="flex:1;display:flex;align-items:center;gap:12px">
+            <a href="/agenda" style="color:white;text-decoration:none;display:flex;align-items:center;gap:8px">
+                <i class="bi bi-arrow-left" style="font-size:20px"></i>
+                <span style="font-size:13px;opacity:.75">Agenda</span>
+            </a>
+        </div>
+        <div class="header-logo">
+            <img src="/images/logo-morhar.png" width="32" height="32" alt="Morhar" style="object-fit:contain">
+            <div>
+                <div class="header-logo-text">MORHAR</div>
+                <span class="header-logo-sub">AUTOMAÇÃO</span>
+            </div>
+        </div>
+        <div class="header-right-group" style="flex:1;justify-content:flex-end">
+            <div class="header-user">
+                <span class="header-username" th:text="${#authentication.name}">Usuário</span>
+                <div class="header-avatar" th:text="${#strings.toUpperCase(#authentication.name.substring(0,1))}">U</div>
+            </div>
+            <div style="position:relative"><i class="bi bi-bell header-icon"></i><span class="notif-badge">3</span></div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-group-label">MENU PRINCIPAL</div>
+        <a href="/dashboard" class="sidebar-item"><i class="bi bi-house-fill"></i> Dashboard</a>
+        <a href="/chamados"  class="sidebar-item"><i class="bi bi-file-text"></i> Chamados</a>
+        <a href="/clientes"  class="sidebar-item" sec:authorize="hasRole('ADMIN')"><i class="bi bi-people"></i> Clientes</a>
+        <a href="/tecnicos"  class="sidebar-item" sec:authorize="hasRole('ADMIN')"><i class="bi bi-person-gear"></i> Técnicos</a>
+        <a href="/agenda"    class="sidebar-item active"><i class="bi bi-calendar3"></i> Agenda</a>
+        <div class="sidebar-group-label">SISTEMA</div>
+        <a href="/perfil"    class="sidebar-item"><i class="bi bi-person"></i> Perfil</a>
+        <div class="sidebar-footer">
+            <form th:action="@{/logout}" method="post" style="margin:0">
+                <button type="submit" class="sidebar-item" style="background:none;border:none;cursor:pointer;font:inherit;width:100%">
+                    <i class="bi bi-box-arrow-left"></i> Sair
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="app-content">
+
+        <!-- Flash messages -->
+        <div class="alert-flash erro"    th:if="${erro}"    th:text="${erro}"></div>
+        <div class="alert-flash sucesso" th:if="${sucesso}" th:text="${sucesso}"></div>
+
+        <!-- Mobile hero -->
+        <div class="hero-band mobile-only">
+            <div class="hero-date" th:text="${ag.dataFormatada} + ' às ' + ${ag.horaInicio}">00/00/0000</div>
+            <div class="hero-title" th:text="${ag.titulo}">Título</div>
+            <div class="hero-client" th:text="${ag.clienteNome}">Cliente</div>
+            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+                <span class="pill" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px"
+                      th:text="${ag.status}"
+                      th:style="${ag.status=='Realizado'}?'background:rgba(34,197,94,.15);color:#22c55e;border:1.5px solid #22c55e':(${ag.status=='Confirmado'}?'background:rgba(13,148,136,.15);color:#0d9488;border:1.5px solid #0d9488':(${ag.status=='Cancelado'}?'background:rgba(100,116,139,.15);color:#64748b;border:1.5px solid #94a3b8':'background:rgba(37,99,235,.15);color:#2563eb;border:1.5px solid #2563eb'))">
+                </span>
+            </div>
+        </div>
+
+        <!-- Desktop hero -->
+        <div class="hero-band-desktop" style="background:white;padding:24px 28px 20px;border-bottom:1px solid #e2e8f0">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                <div>
+                    <div style="font-size:12px;color:var(--app-accent);font-weight:700;margin-bottom:4px"
+                         th:text="${ag.dataFormatada} + ' às ' + ${ag.horaInicio}">data</div>
+                    <div style="font-size:22px;font-weight:800;color:var(--text-primary)" th:text="${ag.titulo}">Título</div>
+                    <div style="font-size:13px;color:var(--text-secondary);margin-top:4px" th:text="${ag.clienteNome}">Cliente</div>
+                    <div style="margin-top:10px">
+                        <span class="status-badge"
+                              th:text="${ag.status}"
+                              th:classappend="${ag.status=='Agendado'}?' badge-agendado':(${ag.status=='Confirmado'}?' badge-confirmado':(${ag.status=='Realizado'}?' badge-realizado':' badge-cancelado'))">
+                        </span>
+                    </div>
+                </div>
+                <div th:if="${isAdmin}" style="display:flex;gap:8px">
+                    <a th:href="@{/agenda/editar/{id}(id=${ag.id})}" class="btn-sm btn-sm-outline" style="border:1.5px solid #e2e8f0">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                    <form th:action="@{/agenda/excluir/{id}(id=${ag.id})}" method="post"
+                          onsubmit="return confirm('Excluir este agendamento?')">
+                        <button type="submit" class="btn-sm btn-sm-danger">
+                            <i class="bi bi-trash"></i> Excluir
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div style="padding:0 16px" class="card-section-wrap">
+
+            <div class="card-section">
+                <div class="card-section-title"><i class="bi bi-calendar-event-fill"></i> Informações do agendamento</div>
+                <div class="info-row">
+                    <span class="info-label">Data</span>
+                    <span class="info-value" th:text="${ag.dataFormatada}">–</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Horário</span>
+                    <span class="info-value">
+                        <span th:text="${ag.horaInicio}">–</span>
+                        <span th:if="${ag.horaFim != null and !ag.horaFim.isEmpty()}"
+                              th:text="' até ' + ${ag.horaFim}" style="color:var(--text-muted)"></span>
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Status</span>
+                    <span class="status-badge"
+                          th:text="${ag.status}"
+                          th:classappend="${ag.status=='Agendado'}?' badge-agendado':(${ag.status=='Confirmado'}?' badge-confirmado':(${ag.status=='Realizado'}?' badge-realizado':' badge-cancelado'))">
+                    </span>
+                </div>
+            </div>
+
+            <div class="card-section">
+                <div class="card-section-title"><i class="bi bi-person-badge-fill"></i> Cliente e local</div>
+                <div class="info-row">
+                    <span class="info-label">Cliente</span>
+                    <span class="info-value" th:text="${ag.clienteNome}">–</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Endereço</span>
+                    <span class="info-value" style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+                        <i class="bi bi-geo-alt" style="color:var(--app-accent)"></i>
+                        <span th:text="${ag.endereco}">–</span>
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Técnico responsável</span>
+                    <span class="info-value" style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+                        <i class="bi bi-person-circle" style="color:var(--app-accent)"></i>
+                        <span th:text="${ag.tecnico}">–</span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="card-section" th:if="${ag.observacao != null and !ag.observacao.isEmpty()}">
+                <div class="card-section-title"><i class="bi bi-chat-left-text-fill"></i> Observações</div>
+                <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin:0"
+                   th:text="${ag.observacao}">–</p>
+            </div>
+
+            <!-- Chamado vinculado -->
+            <div class="card-section" th:if="${chamadoVinculado != null}">
+                <div class="card-section-title"><i class="bi bi-file-text-fill"></i> Chamado vinculado</div>
+                <a th:href="@{/chamados/{id}(id=${chamadoVinculado.id})}"
+                   style="display:flex;align-items:center;gap:12px;text-decoration:none;padding:4px 0">
+                    <div style="width:36px;height:36px;border-radius:10px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                        <i class="bi bi-file-earmark-text" style="color:#2563eb;font-size:16px"></i>
+                    </div>
+                    <div style="flex:1;min-width:0">
+                        <div style="font-size:12px;color:#2563eb;font-weight:700" th:text="'#' + ${chamadoVinculado.numero}">–</div>
+                        <div style="font-size:13px;font-weight:700;color:var(--text-primary)" th:text="${chamadoVinculado.clienteNome}">–</div>
+                        <div style="font-size:11px;color:var(--text-muted);margin-top:1px" th:text="${chamadoVinculado.descricao}">–</div>
+                    </div>
+                    <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:5px">
+                        <span style="padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700"
+                              th:text="${chamadoVinculado.status}"
+                              th:style="${chamadoVinculado.status=='Finalizado'}?'background:#dcfce7;color:#16a34a':(${chamadoVinculado.status=='Em andamento'}?'background:#fef9c3;color:#ca8a04':'background:#fee2e2;color:#dc2626')">
+                        </span>
+                        <i class="bi bi-chevron-right" style="color:#cbd5e1;font-size:13px"></i>
+                    </div>
+                </a>
+            </div>
+
+        </div>
+
+        <!-- Action bar -->
+        <div class="action-bar"
+             th:if="${(isResponsavel or isAdmin) and ag.status != 'Realizado' and ag.status != 'Cancelado'}">
+            <!-- Realizar (técnico responsável ou admin) -->
+            <form th:action="@{/agenda/realizar/{id}(id=${ag.id})}" method="post" style="flex:1">
+                <button type="submit" class="btn-realizar">
+                    <i class="bi bi-check-circle"></i> Marcar como realizado
+                </button>
+            </form>
+            <!-- Cancelar (somente admin) -->
+            <form th:if="${isAdmin}" th:action="@{/agenda/cancelar/{id}(id=${ag.id})}" method="post"
+                  onsubmit="return confirm('Cancelar este agendamento?')">
+                <button type="submit" class="btn-cancelar">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </button>
+            </form>
+        </div>
+
+    </main>
+
+    <nav class="bottom-nav">
+        <a href="/dashboard" class="nav-item"><i class="bi bi-house-fill"></i><span>Dashboard</span></a>
+        <a href="/chamados"  class="nav-item"><i class="bi bi-file-text"></i><span>Chamados</span></a>
+        <a href="/clientes"  class="nav-item" sec:authorize="hasRole('ADMIN')"><i class="bi bi-people"></i><span>Clientes</span></a>
+        <a href="/tecnicos"  class="nav-item" sec:authorize="hasRole('ADMIN')"><i class="bi bi-person-gear"></i><span>Técnicos</span></a>
+        <a href="/agenda"    class="nav-item active" sec:authorize="hasRole('TECNICO')"><i class="bi bi-calendar3"></i><span>Agenda</span></a>
+    </nav>
+</div>
+</body>
+</html>

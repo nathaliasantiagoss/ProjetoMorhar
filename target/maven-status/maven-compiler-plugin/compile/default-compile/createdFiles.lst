@@ -1,8 +1,0 @@
-br\cesarschool\poo\projeto\model\ClientePessoaJuridica.class
-br\cesarschool\poo\projeto\ProjetoApplication.class
-br\cesarschool\poo\projeto\repository\ClienteRepository.class
-br\cesarschool\poo\projeto\model\ClientePessoaFisica.class
-br\cesarschool\poo\projeto\controller\ClienteController.class
-br\cesarschool\poo\projeto\model\ClienteForm.class
-br\cesarschool\poo\projeto\model\Cliente.class
-br\cesarschool\poo\projeto\service\ClienteService.class

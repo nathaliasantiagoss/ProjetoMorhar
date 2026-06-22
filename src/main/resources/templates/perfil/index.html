@@ -1,0 +1,212 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Meu Perfil – Morhar</title>
+    <link rel="stylesheet" href="/css/morhar.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.min.css">
+    <style>
+        .form-topbar {
+            background: var(--app-dark); color: white; padding: 0 18px;
+            height: var(--header-h); display: flex; align-items: center;
+            justify-content: space-between; position: sticky; top: 0; z-index: 100;
+        }
+        .form-section {
+            background: white; border-radius: 16px; padding: 18px; margin-bottom: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.04);
+        }
+        .form-section-title {
+            font-size: 13px; font-weight: 700; color: var(--text-secondary);
+            margin-bottom: 14px; display: flex; align-items: center; gap: 7px;
+            padding-bottom: 10px; border-bottom: 2px solid #f1f5f9;
+        }
+        .form-section-title i { color: var(--app-accent); font-size: 16px; }
+        .info-item { display: flex; justify-content: space-between; align-items: center;
+                     padding: 9px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+        .info-item:last-child { border-bottom: none; }
+        .info-item .label { color: var(--text-secondary); }
+        .info-item .value { font-weight: 600; color: var(--text-primary); }
+        .alert-flash {
+            margin: 0 0 14px; padding: 11px 14px; border-radius: 12px; font-size: 13px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .alert-flash.erro    { background: #fef2f2; color: #dc2626; border: 1.5px solid #fca5a5; }
+        .alert-flash.sucesso { background: #f0fdf4; color: #16a34a; border: 1.5px solid #86efac; }
+        @media (min-width: 768px) {
+            .form-topbar { display: none; }
+            .form-body    { max-width: 760px; margin: 0 auto; padding: 24px 28px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-wrapper">
+
+    <!-- Mobile top bar -->
+    <div class="form-topbar mobile-only">
+        <a href="/dashboard" style="color:white;text-decoration:none">
+            <i class="bi bi-arrow-left" style="font-size:22px"></i>
+        </a>
+        <div style="font-size:15px;font-weight:700">Meu Perfil</div>
+        <div style="width:22px"></div>
+    </div>
+
+    <!-- Desktop header -->
+    <header class="app-header desktop-only">
+        <div style="flex:1;display:flex;align-items:center;gap:12px">
+            <a href="/dashboard" style="color:white;text-decoration:none;display:flex;align-items:center;gap:8px">
+                <i class="bi bi-arrow-left" style="font-size:20px"></i>
+                <span style="font-size:13px;opacity:.75">Dashboard</span>
+            </a>
+        </div>
+        <div class="header-logo">
+            <img src="/images/logo-morhar.png" width="32" height="32" alt="Morhar" style="object-fit:contain">
+            <div>
+                <div class="header-logo-text">MORHAR</div>
+                <span class="header-logo-sub">AUTOMAÇÃO</span>
+            </div>
+        </div>
+        <div class="header-right-group" style="flex:1;justify-content:flex-end">
+            <div class="header-user">
+                <span class="header-username" th:text="${#authentication.name}">Usuário</span>
+                <div class="header-avatar" th:text="${#strings.toUpperCase(#authentication.name.substring(0,1))}">U</div>
+            </div>
+            <div style="position:relative"><i class="bi bi-bell header-icon"></i><span class="notif-badge">3</span></div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-group-label">MENU PRINCIPAL</div>
+        <a href="/dashboard" class="sidebar-item"><i class="bi bi-house-fill"></i> Dashboard</a>
+        <a href="/chamados"  class="sidebar-item"><i class="bi bi-file-text"></i> Chamados</a>
+        <a href="/clientes"  class="sidebar-item" sec:authorize="hasRole('ADMIN')"><i class="bi bi-people"></i> Clientes</a>
+        <a href="/tecnicos"  class="sidebar-item" sec:authorize="hasRole('ADMIN')"><i class="bi bi-person-gear"></i> Técnicos</a>
+        <a href="/agenda"    class="sidebar-item"><i class="bi bi-calendar3"></i> Agenda</a>
+        <div class="sidebar-group-label">SISTEMA</div>
+        <a href="/perfil"    class="sidebar-item active"><i class="bi bi-person"></i> Perfil</a>
+        
+        <div class="sidebar-footer">
+            <form th:action="@{/logout}" method="post" style="margin:0">
+                <button type="submit" class="sidebar-item" style="background:none;border:none;cursor:pointer;font:inherit;width:100%">
+                    <i class="bi bi-box-arrow-left"></i> Sair
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="app-content" style="padding-bottom:100px">
+
+        <div class="desktop-only">
+            <div class="page-title-bar">
+                <div>
+                    <h1>Meu Perfil</h1>
+                    <p>Visualize seus dados e gerencie sua senha.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-body" style="padding:16px 16px 0">
+
+            <!-- Flash messages -->
+            <div class="alert-flash erro"    th:if="${erro}"    th:text="${erro}"></div>
+            <div class="alert-flash sucesso" th:if="${sucesso}" th:text="${sucesso}"></div>
+
+            <!-- Profile card -->
+            <div style="background:linear-gradient(135deg,#0f2549 0%,#1e3a8a 100%);color:white;padding:24px;border-radius:20px;margin-bottom:20px;display:flex;align-items:center;gap:18px">
+                <div style="width:68px;height:68px;border-radius:18px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;flex-shrink:0"
+                     th:text="${#strings.toUpperCase(usuario.username.substring(0,1))}">U</div>
+                <div>
+                    <div style="font-size:19px;font-weight:800" th:text="${usuario.username}">username</div>
+                    <div style="margin-top:6px">
+                        <span style="background:#f59e0b;color:white;padding:3px 12px;border-radius:12px;font-size:11px;font-weight:700"
+                              th:if="${usuario.perfil == 'ADMIN'}">ADMIN</span>
+                        <span style="background:#0d9e9e;color:white;padding:3px 12px;border-radius:12px;font-size:11px;font-weight:700"
+                              th:if="${usuario.perfil == 'TECNICO'}">TÉCNICO</span>
+                    </div>
+                    <div style="font-size:12px;opacity:.7;margin-top:5px"
+                         th:if="${usuario.perfil == 'TECNICO' and usuario.tecnico != null}"
+                         th:text="${usuario.tecnico.email}">email</div>
+                </div>
+            </div>
+
+            <!-- Dados do técnico (somente TECNICO) -->
+            <div th:if="${usuario.perfil == 'TECNICO' and usuario.tecnico != null}">
+                <div class="form-section">
+                    <div class="form-section-title"><i class="bi bi-person-gear"></i> Dados profissionais</div>
+                    <div class="info-item">
+                        <span class="label">Nome completo</span>
+                        <span class="value" th:text="${usuario.tecnico.nome}">–</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">CPF</span>
+                        <span class="value" style="font-family:monospace" th:text="${usuario.tecnico.cpf}">–</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Especialidade</span>
+                        <span class="value" th:text="${usuario.tecnico.especialidade}">–</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Status</span>
+                        <span class="status-badge"
+                              th:text="${usuario.tecnico.status}"
+                              th:classappend="${usuario.tecnico.status=='Ativo'}?' badge-ativo':(${usuario.tecnico.status=='Inativo'}?' badge-inativo':' badge-bloqueado')">–</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Cadastrado em</span>
+                        <span class="value" th:text="${usuario.tecnico.dataCadastro}">–</span>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title"><i class="bi bi-telephone-fill"></i> Contato</div>
+                    <div class="info-item">
+                        <span class="label">E-mail</span>
+                        <span class="value" th:text="${usuario.tecnico.email}">–</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Telefone</span>
+                        <span class="value" th:text="${usuario.tecnico.telefone}">–</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trocar senha -->
+            <div class="form-section">
+                <div class="form-section-title"><i class="bi bi-shield-lock-fill"></i> Alterar senha</div>
+                <form th:action="@{/perfil/senha}" method="post">
+                    <div class="form-field">
+                        <label class="form-label">Senha atual <span class="req">*</span></label>
+                        <input type="password" name="senhaAtual" class="form-control" placeholder="Digite sua senha atual" required>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label">Nova senha <span class="req">*</span></label>
+                        <input type="password" name="novaSenha" class="form-control" placeholder="Mínimo 6 caracteres" required minlength="6">
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label">Confirmar nova senha <span class="req">*</span></label>
+                        <input type="password" name="confirmarSenha" class="form-control" placeholder="Repita a nova senha" required minlength="6">
+                    </div>
+                    <button type="submit" class="btn-app-primary" style="width:100%;border-radius:14px;margin-top:4px">
+                        <i class="bi bi-floppy"></i> Alterar senha
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+        <a href="/dashboard" class="nav-item"><i class="bi bi-house-fill"></i><span>Dashboard</span></a>
+        <a href="/chamados"  class="nav-item"><i class="bi bi-file-text"></i><span>Chamados</span></a>
+        <a href="/clientes"  class="nav-item" sec:authorize="hasRole('ADMIN')"><i class="bi bi-people"></i><span>Clientes</span></a>
+        <a href="/tecnicos"  class="nav-item" sec:authorize="hasRole('ADMIN')"><i class="bi bi-person-gear"></i><span>Técnicos</span></a>
+        <a href="/agenda"    class="nav-item" sec:authorize="hasRole('TECNICO')"><i class="bi bi-calendar3"></i><span>Agenda</span></a>
+    </nav>
+</div>
+</body>
+</html>

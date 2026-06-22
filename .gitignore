@@ -1,0 +1,32 @@
+# Maven build output
+target/
+
+# Banco de dados H2 (gerado em runtime)
+data/
+*.mv.db
+*.trace.db
+
+# Arquivos enviados por usuários
+uploads/
+
+# Logs da JVM
+*.log
+hs_err_pid*.log
+replay_pid*.log
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+*.classpath
+*.project
+*.settings/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Variáveis de ambiente / segredos
+.env
+application-local.properties
+application-prod.properties

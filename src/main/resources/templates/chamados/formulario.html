@@ -1,5 +1,7 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -53,7 +55,7 @@
 
     <!-- Desktop header -->
     <header class="app-header desktop-only">
-        <div style="display:flex;align-items:center;gap:12px">
+        <div style="flex:1;display:flex;align-items:center;gap:12px">
             <a th:href="${chamado.id != null} ? @{/chamados/{id}(id=${chamado.id})} : '/chamados'"
                style="color:white;text-decoration:none;display:flex;align-items:center;gap:8px">
                 <i class="bi bi-arrow-left" style="font-size:20px"></i>
@@ -61,19 +63,16 @@
             </a>
         </div>
         <div class="header-logo">
-            <svg width="26" height="26" viewBox="0 0 50 50" fill="none">
-                <polygon points="25,5 45,18 45,40 25,48 5,40 5,18" fill="#0d9e9e" opacity=".9"/>
-                <polygon points="32,30 45,22 45,40 32,40" fill="#f59e0b"/>
-            </svg>
+            <img src="/images/logo-morhar.png" width="32" height="32" alt="Morhar" style="object-fit:contain">
             <div>
                 <div class="header-logo-text">MORHAR</div>
                 <span class="header-logo-sub">AUTOMAÇÃO</span>
             </div>
         </div>
-        <div class="header-right-group">
+        <div class="header-right-group" style="flex:1;justify-content:flex-end">
             <div class="header-user">
-                <span class="header-username">João Silva</span>
-                <div class="header-avatar">JS</div>
+                <span class="header-username" th:text="${#authentication.name}">Usuário</span>
+                <div class="header-avatar" th:text="${#strings.toUpperCase(#authentication.name.substring(0,1))}">U</div>
             </div>
             <div style="position:relative"><i class="bi bi-bell header-icon"></i><span class="notif-badge">3</span></div>
         </div>
@@ -84,13 +83,18 @@
         <div class="sidebar-group-label">MENU PRINCIPAL</div>
         <a href="/dashboard" class="sidebar-item"><i class="bi bi-house-fill"></i> Dashboard</a>
         <a href="/chamados"  class="sidebar-item active"><i class="bi bi-file-text"></i> Chamados</a>
-        <a href="/clientes"  class="sidebar-item"><i class="bi bi-people"></i> Clientes</a>
+        <a href="/clientes"  class="sidebar-item" sec:authorize="hasRole('ADMIN')"><i class="bi bi-people"></i> Clientes</a>
+        <a href="/tecnicos"  class="sidebar-item" sec:authorize="hasRole('ADMIN')"><i class="bi bi-person-gear"></i> Técnicos</a>
         <a href="/agenda"    class="sidebar-item"><i class="bi bi-calendar3"></i> Agenda</a>
         <div class="sidebar-group-label">SISTEMA</div>
-        <a href="#"          class="sidebar-item"><i class="bi bi-person"></i> Perfil</a>
-        <a href="#"          class="sidebar-item"><i class="bi bi-gear"></i> Configurações</a>
+        <a href="/perfil"    class="sidebar-item"><i class="bi bi-person"></i> Perfil</a>
+        
         <div class="sidebar-footer">
-            <a href="/login" class="sidebar-item"><i class="bi bi-box-arrow-left"></i> Sair</a>
+            <form th:action="@{/logout}" method="post" style="margin:0">
+                <button type="submit" class="sidebar-item" style="background:none;border:none;cursor:pointer;font:inherit;width:100%">
+                    <i class="bi bi-box-arrow-left"></i> Sair
+                </button>
+            </form>
         </div>
     </nav>
 
@@ -134,8 +138,14 @@
 
                     <div class="form-row" style="margin-bottom:12px">
                         <div class="form-field">
-                            <label class="form-label">Nome / Razão social <span class="req">*</span></label>
-                            <input type="text" th:field="*{clienteNome}" class="form-control" placeholder="Nome do cliente" required>
+                            <label class="form-label">Cliente <span class="req">*</span></label>
+                            <select th:field="*{clienteNome}" class="form-select" required>
+                                <option value="">Selecione o cliente</option>
+                                <option th:each="c : ${clientes}"
+                                        th:value="${c.nome}"
+                                        th:text="${c.nome + ' (' + (c.perfil == 'Pessoa Física' ? 'PF' : 'PJ') + ')'}">
+                                </option>
+                            </select>
                         </div>
                         <div class="form-field">
                             <label class="form-label">Status <span class="req">*</span></label>

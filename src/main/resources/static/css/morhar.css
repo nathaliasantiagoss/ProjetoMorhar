@@ -164,6 +164,7 @@ body {
   .header-user   { display: flex; }
   .mobile-only   { display: none !important; }
   .desktop-only  { display: block !important; }
+  .app-header.desktop-only { display: flex !important; }
 
   /* FAB repositioned */
   .fab { right: 28px; bottom: 28px; }
